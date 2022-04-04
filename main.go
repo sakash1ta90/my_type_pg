@@ -1,20 +1,35 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
-	"github.com/sakash1ta90/my_type_pg/types"
+	"github.com/go-ozzo/ozzo-validation/v4"
 )
 
+func JsonParse(b []byte) (map[string]any, error) {
+	var inputValue any
+	if err := json.Unmarshal(b, &inputValue); err != nil {
+		return nil, err
+	}
+	return inputValue.(map[string]any), nil
+}
+
 func main() {
-	// MyAny
-	nilValAny := types.MyAny{}.New(nil)
-	fmt.Printf("nil to MyAny: %v\n", nilValAny.Get())
+	input, err := JsonParse([]byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`))
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	hogeValAny := types.MyAny{}.New("hoge")
-	var hogeValAnyGet string = hogeValAny.Get().(string) // string型
-	fmt.Printf("hoge to MyAny: %v\n", hogeValAnyGet)
+	if err := validation.Validate(input["hoge"],
+		validation.Required,
+		validation.Length(5, 100),
+	); err != nil {
+		fmt.Println(err)
+	}
+	// TODO: 他のフィールドのバリデーション
 
-	numValAny := types.MyAny{}.New(3)
-	fmt.Printf("num to MyAny: %v\n", numValAny.Get())
+	for key, val := range input {
+		fmt.Printf("%s: %+v\n", key, val)
+	}
 }

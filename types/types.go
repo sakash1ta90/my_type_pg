@@ -1,14 +1,14 @@
 package types
 
-// Type向けinterface
+// MyTypes Type向けinterface
 type MyTypes interface {
 	New(value interface{})
 	Get()
 }
 
-// Any型
+// MyAny Any型
 type MyAny struct {
-	value interface{}
+	value any
 }
 
 func (mss MyAny) New(value interface{}) MyAny {
