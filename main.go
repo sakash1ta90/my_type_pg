@@ -17,8 +17,8 @@ func main() {
 		Original:     []byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`),
 		ValidateRule: validateMap,
 	}
-	err := js.Parse()
-	if err != nil {
+
+	if err := js.Parse(); err != nil {
 		fmt.Println(err)
 	}
 
