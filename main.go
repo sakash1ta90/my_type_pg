@@ -7,45 +7,40 @@ import (
 	"github.com/go-ozzo/ozzo-validation/v4"
 )
 
-type JsonStruct struct {
+type MyJson struct {
+	original     []byte
 	JsonFields   map[string]any
 	ValidateRule map[string][]validation.Rule
 }
 
-func (js *JsonStruct) New(b []byte, vr map[string][]validation.Rule) error {
-	input, err := JsonParse(b)
-	if err != nil {
+func (js *MyJson) New() error {
+	var inputValue any
+	if err := json.Unmarshal(js.original, &inputValue); err != nil {
 		return err
 	}
-	js.JsonFields = input
-	js.ValidateRule = vr
+	js.JsonFields = inputValue.(map[string]any)
 	return nil
 }
 
-func (js *JsonStruct) Validate() (errors []error) {
+func (js *MyJson) Validate() (errors []error) {
 	for k, v := range js.JsonFields {
 		errors = append(errors, validation.Validate(v, js.ValidateRule[k]...))
 	}
 	return
 }
 
-var validateMap = map[string][]validation.Rule{
-	"hoge": {validation.Required, validation.Length(5, 100)},
-	"fuga": {validation.Required, validation.Length(5, 100)},
-	"piyo": {validation.Required, validation.Length(5, 100)},
-}
-
-func JsonParse(b []byte) (map[string]any, error) {
-	var inputValue any
-	if err := json.Unmarshal(b, &inputValue); err != nil {
-		return nil, err
-	}
-	return inputValue.(map[string]any), nil
-}
-
 func main() {
-	js := JsonStruct{}
-	err := js.New([]byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`), validateMap)
+	// refs: https://github.com/go-ozzo/ozzo-validation#built-in-validation-rules
+	validateMap := map[string][]validation.Rule{
+		"hoge": {validation.Required, validation.Length(5, 100)},
+		"fuga": {validation.Required, validation.Length(5, 100)},
+		"piyo": {validation.Required, validation.Length(5, 100)},
+	}
+	js := MyJson{
+		original: []byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`),
+		ValidateRule: validateMap,
+	}
+	err := js.New()
 	if err != nil {
 		panic(err)
 	}
