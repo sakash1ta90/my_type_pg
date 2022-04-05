@@ -3,26 +3,37 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/go-ozzo/ozzo-validation/v4"
 )
 
-type MyJson struct {
-	original     []byte
-	JsonFields   map[string]any
-	ValidateRule map[string][]validation.Rule
+type Key interface {
+	int | string
 }
 
-func (js *MyJson) New() error {
+type MyJson[T Key] struct {
+	original     []byte
+	JsonFields   map[T]any
+	ValidateRule map[T][]validation.Rule
+}
+
+func (js *MyJson[T]) Parse() error {
 	if err := json.Unmarshal(js.original, &js.JsonFields); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (js *MyJson) Validate() (errors []error) {
+func (js *MyJson[T]) Validate() (errors []error) {
+	if js.JsonFields == nil {
+		if err := js.Parse(); err != nil {
+			errors = append(errors, err)
+			return
+		}
+	}
 	for k, v := range js.JsonFields {
-		errors = append(errors, validation.Validate(v, js.ValidateRule[k]...))
+		if err := validation.Validate(v, js.ValidateRule[k]...); err != nil {
+			errors = append(errors, err)
+		}
 	}
 	return
 }
@@ -34,11 +45,11 @@ func main() {
 		"fuga": {validation.Required, validation.Length(5, 100)},
 		"piyo": {validation.Required, validation.Length(5, 100)},
 	}
-	js := MyJson{
-		original: []byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`),
+	js := MyJson[string]{
+		original:     []byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`),
 		ValidateRule: validateMap,
 	}
-	err := js.New()
+	err := js.Parse()
 	if err != nil {
 		fmt.Println(err)
 	}
