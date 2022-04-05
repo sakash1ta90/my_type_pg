@@ -14,11 +14,9 @@ type MyJson struct {
 }
 
 func (js *MyJson) New() error {
-	var inputValue any
-	if err := json.Unmarshal(js.original, &inputValue); err != nil {
+	if err := json.Unmarshal(js.original, &js.JsonFields); err != nil {
 		return err
 	}
-	js.JsonFields = inputValue.(map[string]any)
 	return nil
 }
 
