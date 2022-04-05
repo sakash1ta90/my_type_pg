@@ -42,7 +42,7 @@ func main() {
 	}
 	err := js.New()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	if err := js.Validate(); len(err) != 0 {
