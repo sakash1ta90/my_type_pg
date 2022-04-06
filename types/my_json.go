@@ -38,14 +38,11 @@ func (js *MyJson[T]) Validate() (errors []error) {
 		defer close(validateChan)
 	}(validateChan, js.ValidateRule, js.JsonFields)
 
-	errors = func(validateChan <-chan error) (errors []error) {
-		for v := range validateChan {
-			if v != nil {
-				errors = append(errors, v)
-			}
+	for v := range validateChan {
+		if v != nil {
+			errors = append(errors, v)
 		}
-		return
-	}(validateChan)
+	}
 
 	return
 }
