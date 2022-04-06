@@ -10,8 +10,8 @@ type Key interface {
 }
 
 type MyJson[T Key] struct {
-	Original   []byte
-	JsonFields map[T]any
+	Original     []byte
+	JsonFields   map[T]any
 	ValidateRule map[T][]validation.Rule
 }
 
@@ -29,10 +29,21 @@ func (js *MyJson[T]) Validate() (errors []error) {
 			return
 		}
 	}
-	for k, v := range js.JsonFields {
-		if err := validation.Validate(v, js.ValidateRule[k]...); err != nil {
-			errors = append(errors, err)
+	validateChan := make(chan error)
+
+	go func(validateChan chan<- error, validateRules map[T][]validation.Rule, jsonFields map[T]any) {
+		for k, v := range jsonFields {
+			validateChan <- validation.Validate(v, validateRules[k]...)
 		}
-	}
+		defer close(validateChan)
+	}(validateChan, js.ValidateRule, js.JsonFields)
+	errors = func(validateChan <-chan error) (errors []error) {
+		for v := range validateChan {
+			if v != nil {
+				errors = append(errors, v)
+			}
+		}
+		return
+	}(validateChan)
 	return
 }

@@ -23,8 +23,8 @@ func main() {
 	}
 
 	if err := js.Validate(); len(err) != 0 {
-		for _, v := range err {
-			fmt.Println(v)
+		for _, verr := range err {
+			fmt.Println(verr)
 		}
 	}
 
