@@ -1,7 +1,6 @@
 package request
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -18,11 +17,9 @@ var tests = []testRunner{
 		name: "test",
 		scenario: func(t *testing.T) {
 			mj := MyJSON{}
-			if err := mj.New([]byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`)); err != nil {
-				fmt.Println(err)
-			}
+			err := mj.New([]byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`))
+			assert.Nil(t, err)
 			mjFields := mj.Fields()
-			fmt.Printf("%#v\n", mjFields)
 
 			expected := map[string]interface{}{
 				"bar":  "2a",
