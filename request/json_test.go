@@ -19,7 +19,6 @@ var tests = []testRunner{
 			mj := MyJSON{}
 			err := mj.New([]byte(`{"hoge":null, "fuga":"0", "piyo":3, "foo": [0,4], "bar": "2a"}`))
 			assert.Nil(t, err)
-			mjFields := mj.Fields()
 
 			expected := map[string]interface{}{
 				"bar":  "2a",
@@ -28,7 +27,7 @@ var tests = []testRunner{
 				"hoge": interface{}(nil),
 				"piyo": float64(3),
 			}
-			assert.Equal(t, expected, mjFields)
+			assert.Equal(t, expected, mj.Fields())
 			//vMap := map[string][]validation.Rule{
 			//	"hoge": {validation.Nil},
 			//	"fuga": {validation.Required, is.Alphanumeric},
